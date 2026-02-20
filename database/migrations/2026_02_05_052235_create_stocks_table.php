@@ -19,6 +19,8 @@ return new class extends Migration
             $table->integer('closing_stock')->nullable(); // stok sisa
             $table->integer('sold')->default(0); // otomatis
             $table->timestamps();
+
+            $table->unique(['product_id', 'date']);
         });
     }
 
