@@ -51,20 +51,20 @@ const data = {
       icon: <ListIcon />,
     },
     {
-      title: "Analytics",
+      title: "Penjualan",
       url: "#",
       icon: <ChartBarIcon />,
     },
     {
-      title: "Projects",
+      title: "Laporan",
       url: "#",
       icon: <FolderIcon />,
     },
-    {
-      title: "Team",
-      url: "#",
-      icon: <UsersIcon />,
-    },
+    // {
+    //   title: "Team",
+    //   url: "#",
+    //   icon: <UsersIcon />,
+    // },
   ],
   navClouds: [
     {

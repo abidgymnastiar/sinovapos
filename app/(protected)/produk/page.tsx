@@ -1,7 +1,6 @@
-import { CustomButton } from "@/app/_components/CustomButton";
 import { getProducts } from "@/services/productService";
-import { PlusIcon } from "lucide-react";
 
+import { ProductModalForm } from "./modal-form";
 import { ProductTable } from "./table-core";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30, 40];
@@ -39,13 +38,9 @@ export default async function ProdukPage({ searchParams }: ProdukPageProps) {
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-      <div className="flex items-center justify-between gap-3 px-4 lg:px-6">
-        <h1 className="text-lg font-semibold tracking-tight">Produk</h1>
-        <CustomButton
-          label="Tambah Produk"
-          icon={<PlusIcon className="h-4 w-4" />}
-          // onClick={() => console.log("Tambah Produk")}
-        />
+      <div className="flex items-end justify-end gap-3 px-4 lg:px-6">
+        {/* <h1 className="text-lg font-semibold tracking-tight">Produk</h1> */}
+        <ProductModalForm />
       </div>
       <div className="px-4 lg:px-6">
         <ProductTable

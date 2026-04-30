@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type {
   ColumnDef,
@@ -16,21 +17,13 @@ import {
 } from "@/components/ui/avatar";
 import type { Product, ProductResponse } from "@/services/productService";
 
+const PRODUCT_FALLBACK_IMAGE = "/notFound.png";
+
 type ProductTableProps = {
   data: Product[];
   meta: ProductResponse["meta"];
   pageSizeOptions?: number[];
 };
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-}
 
 function formatDate(value: string | null) {
   if (!value) {
@@ -74,6 +67,27 @@ function getImageSrc(value: string | null) {
   return `/${trimmedValue}`;
 }
 
+function ProductImage({ product }: { product: Product }) {
+  return (
+    <Avatar className="size-10 rounded-md border bg-muted">
+      <AvatarImage
+        src={getImageSrc(product.image)}
+        alt={`Gambar ${product.name}`}
+        className="object-cover"
+      />
+      <AvatarFallback className="rounded-md">
+        <Image
+          src={PRODUCT_FALLBACK_IMAGE}
+          alt="Gambar produk tidak ditemukan"
+          width={40}
+          height={40}
+          className="size-10 object-cover"
+        />
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
 export function ProductTable({
   data,
   meta,
@@ -104,15 +118,7 @@ export function ProductTable({
         header: "Nama Produk",
         cell: ({ row }) => (
           <div className="flex min-w-0 items-center gap-3">
-            <Avatar className="size-9 rounded-md">
-              <AvatarImage
-                src={getImageSrc(row.original.image)}
-                alt={row.original.name}
-              />
-              <AvatarFallback className="rounded-md text-xs">
-                {getInitials(row.original.name) || "PR"}
-              </AvatarFallback>
-            </Avatar>
+            <ProductImage product={row.original} />
             <div className="min-w-0">
               <div className="truncate font-medium">{row.original.name}</div>
               <div className="text-xs text-muted-foreground">
