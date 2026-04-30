@@ -39,6 +39,11 @@ export async function GET(
 
     const product = await prisma.product.findUnique({
       where: { id },
+      include: {
+        stocks: {
+          orderBy: [{ date: "desc" }, { id: "desc" }],
+        },
+      },
     });
 
     if (!product) {
@@ -51,6 +56,9 @@ export async function GET(
     return NextResponse.json({
       success: true,
       data: toJSON(product),
+      meta: {
+        totalStocks: product.stocks.length,
+      },
     });
   } catch (error: unknown) {
     console.error("GET PRODUCT ERROR:", error);
