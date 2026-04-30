@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/avatar";
 import type { Product, ProductResponse } from "@/services/productService";
 
+import { ProductActionMenu } from "./action-menu";
+
 const PRODUCT_FALLBACK_IMAGE = "/notFound.png";
 
 type ProductTableProps = {
@@ -137,6 +139,11 @@ export function ProductTable({
         accessorKey: "updated_at",
         header: "Diperbarui",
         cell: ({ row }) => formatDate(row.original.updated_at),
+      },
+      {
+        id: "actions",
+        header: "Aksi",
+        cell: ({ row }) => <ProductActionMenu product={row.original} />,
       },
     ],
     [meta.limit, meta.page],
