@@ -1,134 +1,59 @@
-"use client";
+import { CustomButton } from "@/app/_components/CustomButton";
+import { getProducts } from "@/services/productService";
+import { PlusIcon } from "lucide-react";
 
-import { DataTable } from "@/app/_components/data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import Image from "next/image";
+import { ProductTable } from "./table-core";
 
-type Product = {
-  id: string;
-  name: string;
-  image?: string;
+const PAGE_SIZE_OPTIONS = [10, 20, 30, 40];
+
+type ProdukPageProps = {
+  searchParams: Promise<{
+    page?: string | string[];
+    limit?: string | string[];
+  }>;
 };
 
-const columns: ColumnDef<Product>[] = [
-  {
-    accessorKey: "id",
-    header: "ID",
-  },
-  {
-    accessorKey: "name",
-    header: "Nama Produk",
-  },
-  {
-    accessorKey: "image",
-    header: "Image",
-    cell: ({ row }) => {
-      const image = row.original.image;
+function getSearchParamValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
 
-      if (!image) {
-        return <span className="text-muted-foreground">No Image</span>;
-      }
+function getPositiveNumber(value: string | undefined, fallback: number) {
+  const parsedValue = Number(value);
 
-      return (
-        <Image
-          width={300}
-          height={300}
-          src={image}
-          alt={row.original.name}
-          className="w-12 h-12 object-cover rounded-md"
-        />
-      );
-    },
-  },
-];
+  return Number.isInteger(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : fallback;
+}
 
-export default function Page() {
-  const data: Product[] = [
-    {
-      id: "1",
-      name: "Nasi Goreng",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "2",
-      name: "Mie Ayam",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: "3",
-      name: "Bakso",
-      image:
-        "https://plus.unsplash.com/premium_photo-1776472294570-9090932e7aa2?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    { id: "3", name: "Bakso" },
-    { id: "3", name: "Bakso" },
-    { id: "3", name: "Bakso" },
-    { id: "3", name: "Bakso" },
-    { id: "3", name: "Bakso" },
-    { id: "3", name: "Bakso" },
-    { id: "3", name: "Bakso" },
-    { id: "3", name: "Bakso" },
-  ];
+function getAllowedLimit(value: string | undefined) {
+  const limit = getPositiveNumber(value, 10);
+
+  return PAGE_SIZE_OPTIONS.includes(limit) ? limit : 10;
+}
+
+export default async function ProdukPage({ searchParams }: ProdukPageProps) {
+  const params = await searchParams;
+  const page = getPositiveNumber(getSearchParamValue(params.page), 1);
+  const limit = getAllowedLimit(getSearchParamValue(params.limit));
+  const result = await getProducts(page, limit);
 
   return (
-    <div className="p-5">
-      <DataTable columns={columns} data={data} />
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+      <div className="flex items-center justify-between gap-3 px-4 lg:px-6">
+        <h1 className="text-lg font-semibold tracking-tight">Produk</h1>
+        <CustomButton
+          label="Tambah Produk"
+          icon={<PlusIcon className="h-4 w-4" />}
+          // onClick={() => console.log("Tambah Produk")}
+        />
+      </div>
+      <div className="px-4 lg:px-6">
+        <ProductTable
+          data={result.data}
+          meta={result.meta}
+          pageSizeOptions={PAGE_SIZE_OPTIONS}
+        />
+      </div>
     </div>
   );
 }
