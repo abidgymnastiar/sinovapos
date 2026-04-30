@@ -2,14 +2,11 @@ import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-// helper BigInt
-function toJSON<T>(data: T): T {
-  return JSON.parse(
-    JSON.stringify(data, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value,
-    ),
-  );
-}
+import {
+  isProductImageValidationError,
+  parseProductPayload,
+  toJSON,
+} from "../_helpers/product";
 
 function parseProductId(rawId: string): bigint | null {
   if (!/^\d+$/.test(rawId)) {
@@ -92,14 +89,31 @@ export async function PUT(
       );
     }
 
-    const body: { name?: string; image?: string } = await req.json();
+    const body = await parseProductPayload(req);
+    const data: Prisma.ProductUpdateInput = {};
 
-    // optional validation
-    if (!body.name && !body.image) {
+    if (body.name !== undefined) {
+      const name = body.name.trim();
+
+      if (!name) {
+        return NextResponse.json(
+          { success: false, message: "Nama produk wajib diisi." },
+          { status: 400 },
+        );
+      }
+
+      data.name = name;
+    }
+
+    if (body.image !== undefined) {
+      data.image = body.image;
+    }
+
+    if (Object.keys(data).length === 0) {
       return NextResponse.json(
         {
           success: false,
-          message: "At least one field (name/image) is required",
+          message: "Minimal satu field produk harus dikirim.",
         },
         { status: 400 },
       );
@@ -107,10 +121,7 @@ export async function PUT(
 
     const product = await prisma.product.update({
       where: { id },
-      data: {
-        name: body.name,
-        image: body.image,
-      },
+      data,
     });
 
     return NextResponse.json({
@@ -119,6 +130,13 @@ export async function PUT(
     });
   } catch (error: unknown) {
     console.error("UPDATE PRODUCT ERROR:", error);
+
+    if (isProductImageValidationError(error)) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 },
+      );
+    }
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2025") {

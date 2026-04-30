@@ -49,7 +49,7 @@ export function ActionMenu({
             {item.separatorBefore ? <DropdownMenuSeparator /> : null}
             <DropdownMenuItem
               disabled={item.disabled}
-              onSelect={item.onSelect}
+              onSelect={() => item.onSelect?.()}
               variant={item.variant}
             >
               {item.label}

@@ -1,34 +1,52 @@
 "use client";
 
+import * as React from "react";
+
 import {
   ActionMenu,
   type ActionMenuItem,
 } from "@/app/_components/action-menu";
 import type { Product } from "@/services/productService";
 
-const PRODUCT_ACTION_ITEMS: ActionMenuItem[] = [
-  {
-    label: "Selengkapnya",
-  },
-  {
-    label: "Edit",
-  },
-  {
-    label: "Delete",
-    separatorBefore: true,
-    variant: "destructive",
-  },
-];
+import { ProductEditModalForm } from "./edit-modal-form";
 
 type ProductActionMenuProps = {
   product: Product;
 };
 
 export function ProductActionMenu({ product }: ProductActionMenuProps) {
+  const [editOpen, setEditOpen] = React.useState(false);
+  const items = React.useMemo<ActionMenuItem[]>(
+    () => [
+      {
+        label: "Selengkapnya",
+      },
+      {
+        label: "Edit",
+        onSelect: () => setEditOpen(true),
+      },
+      {
+        label: "Delete",
+        separatorBefore: true,
+        variant: "destructive",
+      },
+    ],
+    [],
+  );
+
   return (
-    <ActionMenu
-      items={PRODUCT_ACTION_ITEMS}
-      label={`Buka menu aksi produk ${product.name}`}
-    />
+    <>
+      <ActionMenu
+        items={items}
+        label={`Buka menu aksi produk ${product.name}`}
+      />
+      {editOpen ? (
+        <ProductEditModalForm
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          product={product}
+        />
+      ) : null}
+    </>
   );
 }
