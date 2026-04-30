@@ -2,7 +2,6 @@ import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-// helper BigInt serializer (tanpa any)
 function toJSON<T>(data: T): T {
   return JSON.parse(
     JSON.stringify(data, (_, value) =>
@@ -16,13 +15,9 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
-    // page
     const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
-
-    // limit dari UI
     const limitParam = Number(searchParams.get("limit") ?? "10");
 
-    // whitelist limit
     const allowedLimits = [10, 20, 30, 40];
     const limit = allowedLimits.includes(limitParam) ? limitParam : 10;
 
@@ -36,24 +31,24 @@ export async function GET(req: Request) {
       take: limit,
     });
 
-    return NextResponse.json(
-      toJSON({
-        data: products,
-        meta: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      }),
-    );
+    return NextResponse.json({
+      success: true,
+      data: toJSON(products),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error: unknown) {
     console.error("GET PRODUCTS ERROR:", error);
 
     return NextResponse.json(
       {
+        success: false,
         message:
-          error instanceof Error ? error.message : "Failed to fetch products",
+          error instanceof Error ? error.message : "Internal Server Error",
       },
       { status: 500 },
     );
@@ -65,10 +60,9 @@ export async function POST(req: Request) {
   try {
     const body: { name?: string; image?: string } = await req.json();
 
-    // validasi
-    if (!body.name) {
+    if (!body.name || body.name.trim() === "") {
       return NextResponse.json(
-        { message: "Name is required" },
+        { success: false, message: "Name is required" },
         { status: 400 },
       );
     }
@@ -80,19 +74,28 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(toJSON(product), { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: toJSON(product),
+      },
+      { status: 201 },
+    );
   } catch (error: unknown) {
     console.error("CREATE PRODUCT ERROR:", error);
 
-    // handle error prisma (optional tapi bagus)
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return NextResponse.json({ message: error.message }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json(
       {
+        success: false,
         message:
-          error instanceof Error ? error.message : "Failed to create product",
+          error instanceof Error ? error.message : "Internal Server Error",
       },
       { status: 500 },
     );
