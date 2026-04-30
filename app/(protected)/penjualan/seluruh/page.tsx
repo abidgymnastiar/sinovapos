@@ -1,4 +1,4 @@
-export default function PenjualanPage() {
+export default function SeluruhPage() {
   return (
     <div>
       <h1>Penjualan Page</h1>

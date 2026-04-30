@@ -1,21 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-
-// helper BigInt
-function toJSON<T>(data: T): T {
-  return JSON.parse(
-    JSON.stringify(data, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value
-    )
-  );
-}
+import {
+  parseProductId,
+  parseStockDate,
+  STOCK_INCLUDE,
+  getStockDateRange,
+  toJSON,
+} from "./_helpers/stock";
 
 // GET ALL
 export async function GET() {
   try {
     const stocks = await prisma.stock.findMany({
       orderBy: { date: "desc" },
-      include: { product: true },
+      include: STOCK_INCLUDE,
     });
 
     return NextResponse.json(toJSON(stocks));
@@ -23,7 +21,7 @@ export async function GET() {
     console.error(error);
     return NextResponse.json(
       { message: "Failed to fetch stocks" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -41,24 +39,86 @@ export async function POST(req: Request) {
     if (!body.product_id || !body.date || body.opening_stock === undefined) {
       return NextResponse.json(
         { message: "Invalid input" },
-        { status: 400 }
+        { status: 400 },
+      );
+    }
+
+    const productId = parseProductId(body.product_id);
+    const stockDate = parseStockDate(body.date);
+    const openingStock = Number(body.opening_stock);
+    const closingStock =
+      body.closing_stock === undefined ? undefined : Number(body.closing_stock);
+
+    if (productId === null || stockDate === null) {
+      return NextResponse.json(
+        { message: "Product ID atau tanggal tidak valid" },
+        { status: 400 },
+      );
+    }
+
+    if (
+      !Number.isInteger(openingStock) ||
+      openingStock < 0 ||
+      (closingStock !== undefined &&
+        (!Number.isInteger(closingStock) || closingStock < 0))
+    ) {
+      return NextResponse.json(
+        { message: "Stok harus berupa angka bulat dan tidak boleh negatif" },
+        { status: 400 },
+      );
+    }
+
+    if (closingStock !== undefined && closingStock > openingStock) {
+      return NextResponse.json(
+        { message: "Stok akhir tidak boleh lebih besar dari stok awal" },
+        { status: 400 },
+      );
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true },
+    });
+
+    if (!product) {
+      return NextResponse.json(
+        { message: "Produk tidak ditemukan" },
+        { status: 404 },
+      );
+    }
+
+    const existingStock = await prisma.stock.findFirst({
+      where: {
+        product_id: productId,
+        date: getStockDateRange(stockDate),
+      },
+      include: STOCK_INCLUDE,
+    });
+
+    if (existingStock) {
+      return NextResponse.json(
+        {
+          message:
+            "Penjualan produk ini untuk tanggal tersebut sudah pernah ditambahkan",
+          data: toJSON(existingStock),
+        },
+        { status: 409 },
       );
     }
 
     // hitung sold
     const sold =
-      body.closing_stock !== undefined
-        ? body.opening_stock - body.closing_stock
-        : null;
+      closingStock !== undefined ? openingStock - closingStock : null;
 
     const stock = await prisma.stock.create({
       data: {
-        product_id: BigInt(body.product_id),
-        date: new Date(body.date),
-        opening_stock: body.opening_stock,
-        closing_stock: body.closing_stock,
+        product_id: productId,
+        date: stockDate,
+        opening_stock: openingStock,
+        closing_stock: closingStock,
         sold: sold ?? 0, // default prisma but kita kontrol logic
       },
+      include: STOCK_INCLUDE,
     });
 
     return NextResponse.json(toJSON(stock), { status: 201 });
@@ -66,7 +126,7 @@ export async function POST(req: Request) {
     console.error(error);
     return NextResponse.json(
       { message: "Failed to create stock" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
