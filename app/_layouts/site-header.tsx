@@ -19,6 +19,14 @@ const routeTitles = [
     url: "/produk",
   },
   {
+    title: "Penjualan Hari Ini",
+    url: "/penjualan/hari-ini",
+  },
+  {
+    title: "Seluruh Penjualan",
+    url: "/penjualan/seluruh",
+  },
+  {
     title: "Penjualan",
     url: "/penjualan",
   },

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 
-import { NavDocuments } from "@/app/_layouts/nav-documents";
 import { NavMain } from "@/app/_layouts/nav-main";
 import { NavSecondary } from "@/app/_layouts/nav-secondary";
 import { NavUser } from "@/app/_layouts/nav-user";
@@ -20,7 +19,6 @@ import {
   ListIcon,
   ChartBarIcon,
   FolderIcon,
-  UsersIcon,
   CameraIcon,
   FileTextIcon,
   Settings2Icon,
@@ -52,8 +50,18 @@ const data = {
     },
     {
       title: "Penjualan",
-      url: "#",
+      url: "/penjualan",
       icon: <ChartBarIcon />,
+      items: [
+        {
+          title: "Penjualan Hari Ini",
+          url: "/penjualan/hari-ini",
+        },
+        {
+          title: "Seluruh Penjualan",
+          url: "/penjualan/seluruh",
+        },
+      ],
     },
     {
       title: "Laporan",
