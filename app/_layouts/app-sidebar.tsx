@@ -54,11 +54,11 @@ const data = {
       icon: <ChartBarIcon />,
       items: [
         {
-          title: "Penjualan Hari Ini",
+          title: "Hari Ini",
           url: "/penjualan/hari-ini",
         },
         {
-          title: "Seluruh Penjualan",
+          title: "Seluruh Data",
           url: "/penjualan/seluruh",
         },
       ],

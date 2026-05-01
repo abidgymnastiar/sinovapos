@@ -19,11 +19,11 @@ const routeTitles = [
     url: "/produk",
   },
   {
-    title: "Penjualan Hari Ini",
+    title: "Hari Ini",
     url: "/penjualan/hari-ini",
   },
   {
-    title: "Seluruh Penjualan",
+    title: "Seluruh Data",
     url: "/penjualan/seluruh",
   },
   {
