@@ -45,6 +45,11 @@ function formatSegmentTitle(segment: string) {
 function getPageTitle(pathname: string) {
   const normalizedPathname =
     pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
+
+  if (/^\/produk\/[^/]+$/.test(normalizedPathname)) {
+    return "Detail Produk";
+  }
+
   const matchedRoute = routeTitles.find(
     (route) =>
       normalizedPathname === route.url ||

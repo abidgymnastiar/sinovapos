@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 
 import {
   ActionMenu,
@@ -15,11 +16,13 @@ type ProductActionMenuProps = {
 };
 
 export function ProductActionMenu({ product }: ProductActionMenuProps) {
+  const router = useRouter();
   const [editOpen, setEditOpen] = React.useState(false);
   const items = React.useMemo<ActionMenuItem[]>(
     () => [
       {
         label: "Selengkapnya",
+        onSelect: () => router.push(`/produk/${product.id}`),
       },
       {
         label: "Edit",
@@ -31,7 +34,7 @@ export function ProductActionMenu({ product }: ProductActionMenuProps) {
         variant: "destructive",
       },
     ],
-    [],
+    [product.id, router],
   );
 
   return (
