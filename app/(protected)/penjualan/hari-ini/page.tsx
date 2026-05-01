@@ -1,5 +1,7 @@
+import { getAllProducts } from "@/services/productService";
 import { getStocks, type Stock } from "@/services/stockService";
 
+import { StockModalForm } from "../modal-form";
 import { StockTodayTable } from "./table-core";
 
 const JAKARTA_TIME_ZONE = "Asia/Jakarta";
@@ -23,13 +25,23 @@ function isTodayStock(stock: Stock) {
 }
 
 export default async function HariIniPage() {
-  const stocks = await getStocks();
+  const [stocks, productsResult] = await Promise.all([
+    getStocks(),
+    getAllProducts(),
+  ]);
   const todayStocks = stocks.filter(isTodayStock);
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+      <div className="flex items-end justify-end gap-3 px-4 lg:px-6">
+        <StockModalForm
+          products={productsResult}
+          title="Tambah Penjualan Hari Ini"
+          description="Simpan data penjualan produk untuk tanggal hari ini."
+        />
+      </div>
       <div className="px-4 lg:px-6">
-        <StockTodayTable data={todayStocks} />
+        <StockTodayTable data={todayStocks} products={productsResult} />
       </div>
     </div>
   );

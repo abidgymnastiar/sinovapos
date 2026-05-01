@@ -13,10 +13,13 @@ import {
 import type { Product } from "@/services/productService";
 import type { Stock } from "@/services/stockService";
 
+import { StockActionMenu } from "../action-menu";
+
 const PRODUCT_FALLBACK_IMAGE = "/notFound.png";
 
 type StockTodayTableProps = {
   data: Stock[];
+  products: Product[];
 };
 
 function formatDate(value: string | null) {
@@ -88,7 +91,7 @@ function ProductCell({ product }: { product: Product }) {
   );
 }
 
-export function StockTodayTable({ data }: StockTodayTableProps) {
+export function StockTodayTable({ data, products }: StockTodayTableProps) {
   const columns = React.useMemo<ColumnDef<Stock>[]>(
     () => [
       {
@@ -119,8 +122,19 @@ export function StockTodayTable({ data }: StockTodayTableProps) {
         accessorKey: "sold",
         header: "Terjual",
       },
+      {
+        id: "actions",
+        header: "Aksi",
+        cell: ({ row }) => (
+          <StockActionMenu
+            dateMode="today"
+            products={products}
+            stock={row.original}
+          />
+        ),
+      },
     ],
-    [],
+    [products],
   );
 
   return (

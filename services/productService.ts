@@ -54,6 +54,27 @@ export const getProducts = async (
   return res.data;
 };
 
+export const getAllProducts = async (): Promise<Product[]> => {
+  const firstPage = await getProducts(1, 40);
+  const remainingPages = Array.from(
+    { length: Math.max(firstPage.meta.totalPages - 1, 0) },
+    (_, index) => index + 2,
+  );
+
+  if (remainingPages.length === 0) {
+    return firstPage.data;
+  }
+
+  const results = await Promise.all(
+    remainingPages.map((page) => getProducts(page, 40)),
+  );
+
+  return [
+    ...firstPage.data,
+    ...results.flatMap((result) => result.data),
+  ];
+};
+
 // GET PRODUCT DETAIL
 export const getProductById = async (
   id: string,
