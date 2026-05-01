@@ -1,4 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
+import { now } from "@/lib/date";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -65,10 +66,13 @@ export async function POST(req: Request) {
       );
     }
 
+    const currentDate = now();
     const product = await prisma.product.create({
       data: {
-        name: body.name.trim(),
+        created_at: currentDate,
         image: body.image,
+        name: body.name.trim(),
+        updated_at: currentDate,
       },
     });
 

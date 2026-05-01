@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { now } from "@/lib/date";
 import { NextResponse } from "next/server";
 import {
   parseProductId,
@@ -110,13 +111,16 @@ export async function POST(req: Request) {
     const sold =
       closingStock !== undefined ? openingStock - closingStock : null;
 
+    const currentDate = now();
     const stock = await prisma.stock.create({
       data: {
-        product_id: productId,
+        created_at: currentDate,
+        closing_stock: closingStock,
         date: stockDate,
         opening_stock: openingStock,
-        closing_stock: closingStock,
+        product_id: productId,
         sold: sold ?? 0, // default prisma but kita kontrol logic
+        updated_at: currentDate,
       },
       include: STOCK_INCLUDE,
     });

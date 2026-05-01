@@ -1,4 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
+import { now } from "@/lib/date";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -118,6 +119,26 @@ export async function PUT(
         { status: 400 },
       );
     }
+
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+      select: { created_at: true },
+    });
+
+    if (!existingProduct) {
+      return NextResponse.json(
+        { success: false, message: "Product not found" },
+        { status: 404 },
+      );
+    }
+
+    const currentDate = now();
+
+    if (!existingProduct.created_at) {
+      data.created_at = currentDate;
+    }
+
+    data.updated_at = currentDate;
 
     const product = await prisma.product.update({
       where: { id },
