@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/chart";
 import { ChartFilter } from "@/app/_components/line-chart/chart-filter";
 import type { TimeRange } from "@/app/_components/line-chart/chart-types";
+import { getProducts } from "@/services/productService";
+import { getDashboardProductSales } from "@/services/dashboardService";
 
 const chartConfig = {
   sold: {
@@ -37,7 +39,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Product = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -55,28 +57,25 @@ const daysMap: Record<TimeRange, number> = {
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState<TimeRange | null>(null);
-  const [selectedProductId, setSelectedProductId] = React.useState<string>("all");
+  const [selectedProductId, setSelectedProductId] =
+    React.useState<string>("");
   const [products, setProducts] = React.useState<Product[]>([]);
+  const [topProduct, setTopProduct] = React.useState<Product | null>(null);
   const [chartData, setChartData] = React.useState<SoldChartItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   const selectedTimeRange = timeRange ?? (isMobile ? "7d" : "90d");
   const selectedProduct =
-    products.find((product) => String(product.id) === selectedProductId) ??
-    { id: 0, name: "All products" };
+    products.find((product) => product.id === selectedProductId) ??
+    topProduct ??
+    { id: "", name: "Product" };
 
   React.useEffect(() => {
     async function loadProducts() {
       try {
-        const response = await fetch("/api/products?page=1&limit=100");
-        const json = await response.json();
-
-        if (json?.success) {
-          setProducts(json.data ?? []);
-        } else {
-          console.error("Failed to load product list", json);
-        }
+        const response = await getProducts(1, 100);
+        setProducts(response.data ?? []);
       } catch (err) {
         console.error("Product list fetch error", err);
       }
@@ -91,21 +90,25 @@ export function ChartAreaInteractive() {
       setError(null);
 
       const days = daysMap[selectedTimeRange];
-      const productIdQuery =
-        selectedProductId === "all" ? "" : `&productId=${selectedProductId}`;
 
       try {
-        const response = await fetch(
-          `/api/dashboard/product?days=${days}${productIdQuery}`,
+        const response = await getDashboardProductSales(
+          days,
+          selectedProductId ? selectedProductId : undefined,
         );
-        const json = await response.json();
 
-        if (!json?.success) {
-          throw new Error(json?.message ?? "Failed to load chart data");
+        const responseData = response.data ?? [];
+
+        if (!selectedProductId && responseData.length > 0) {
+          setSelectedProductId(String(responseData[0].product_id));
+          setTopProduct({
+            id: String(responseData[0].product_id),
+            name: responseData[0].product_name,
+          });
         }
 
         setChartData(
-          (json.data ?? []).map((item: { date: string; sold: number }) => ({
+          responseData.map((item) => ({
             date: item.date,
             sold: item.sold,
           })),
@@ -125,13 +128,10 @@ export function ChartAreaInteractive() {
       <CardHeader>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>
-              {selectedProductId === "all"
-                ? "All products"
-                : selectedProduct.name}
-            </CardTitle>
+            <CardTitle>{selectedProduct.name}</CardTitle>
             <CardDescription>
-              Showing sales data for {selectedProduct.name} over the last {daysMap[selectedTimeRange]} days.
+              Showing sales data for {selectedProduct.name} over the last{" "}
+              {daysMap[selectedTimeRange]} days.
             </CardDescription>
           </div>
 
@@ -147,12 +147,11 @@ export function ChartAreaInteractive() {
                 className="w-48"
                 aria-label="Select product"
               >
-                <SelectValue placeholder="All products" />
+                <SelectValue placeholder="Select product" />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
-                <SelectItem value="all">All products</SelectItem>
                 {products.map((product) => (
-                  <SelectItem key={product.id} value={String(product.id)}>
+                  <SelectItem key={product.id} value={product.id}>
                     {product.name}
                   </SelectItem>
                 ))}
@@ -170,8 +169,16 @@ export function ChartAreaInteractive() {
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="fillSold" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-sold)" stopOpacity={1} />
-                <stop offset="95%" stopColor="var(--color-sold)" stopOpacity={0.1} />
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-sold)"
+                  stopOpacity={1}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-sold)"
+                  stopOpacity={0.1}
+                />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} />

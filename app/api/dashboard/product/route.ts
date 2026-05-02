@@ -15,6 +15,17 @@ export async function GET(req: Request) {
   const days = Number(searchParams.get("days") ?? 90);
 
   try {
+    const productFilter = productId
+      ? `AND p.id = ${Number(productId)}`
+      : `AND p.id = (
+          SELECT product_id
+          FROM Stock s2
+          WHERE s2.date >= DATE_SUB(CURDATE(), INTERVAL ${days} DAY)
+          GROUP BY product_id
+          ORDER BY SUM(s2.sold) DESC
+          LIMIT 1
+        )`;
+
     const result = await prisma.$queryRawUnsafe<SoldPerProductPerDay[]>(`
       SELECT 
         DATE(s.date) as date,
@@ -24,7 +35,7 @@ export async function GET(req: Request) {
       FROM Stock s
       JOIN Product p ON p.id = s.product_id
       WHERE s.date >= DATE_SUB(CURDATE(), INTERVAL ${days} DAY)
-      ${productId ? `AND p.id = ${Number(productId)}` : ""}
+      ${productFilter}
       GROUP BY DATE(s.date), p.id, p.name
       ORDER BY date ASC
     `);
