@@ -4,8 +4,19 @@ import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { ChartFilter } from "@/app/_components/line-chart/chart-filter";
 import type { TimeRange } from "@/app/_components/line-chart/chart-types";
 import { getDashboardProductSales } from "@/services/dashboardService";
@@ -33,7 +44,10 @@ const daysMap: Record<TimeRange, number> = {
   "7d": 7,
 };
 
-export function ProductDetailChart({ productId, productName }: ProductDetailChartProps) {
+export function ProductDetailChart({
+  productId,
+  productName,
+}: ProductDetailChartProps) {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState<TimeRange | null>(null);
   const [chartData, setChartData] = React.useState<SoldChartItem[]>([]);
@@ -75,7 +89,8 @@ export function ProductDetailChart({ productId, productName }: ProductDetailChar
           <div>
             <CardTitle>{productName}</CardTitle>
             <CardDescription>
-              Showing sales data for {productName} over the last {daysMap[selectedTimeRange]} days.
+              Showing sales data for {productName} over the last{" "}
+              {daysMap[selectedTimeRange]} days.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -85,12 +100,23 @@ export function ProductDetailChart({ productId, productName }: ProductDetailChar
       </CardHeader>
 
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[250px] w-full"
+        >
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="fillSold" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-sold)" stopOpacity={1} />
-                <stop offset="95%" stopColor="var(--color-sold)" stopOpacity={0.1} />
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-sold)"
+                  stopOpacity={1}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-sold)"
+                  stopOpacity={0.1}
+                />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} />
@@ -121,7 +147,13 @@ export function ProductDetailChart({ productId, productName }: ProductDetailChar
                 />
               }
             />
-            <Area dataKey="sold" type="natural" fill="url(#fillSold)" stroke="var(--color-sold)" stackId="a" />
+            <Area
+              dataKey="sold"
+              type="natural"
+              fill="url(#fillSold)"
+              stroke="var(--color-sold)"
+              stackId="a"
+            />
           </AreaChart>
         </ChartContainer>
 
@@ -130,7 +162,9 @@ export function ProductDetailChart({ productId, productName }: ProductDetailChar
             Loading chart data...
           </div>
         ) : error ? (
-          <div className="mt-4 text-center text-sm text-destructive">{error}</div>
+          <div className="mt-4 text-center text-sm text-destructive">
+            {error}
+          </div>
         ) : chartData.length === 0 ? (
           <div className="mt-4 text-center text-sm text-muted-foreground">
             No sales data available for this product.
