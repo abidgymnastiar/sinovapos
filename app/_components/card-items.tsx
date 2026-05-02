@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -9,12 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TrendingUpIcon, TrendingDownIcon } from "lucide-react";
+// import { TrendingUpIcon, TrendingDownIcon } from "lucide-react";
 
 type CardItemProps = {
   title: string;
   value: string;
-  trend: "up" | "down";
+//   trend: "up" | "down";
   percentage: string;
   description: string;
   footer: string;
@@ -23,13 +23,13 @@ type CardItemProps = {
 export function CardItem({
   title,
   value,
-  trend,
-  percentage,
+//   trend,
+//   percentage,
   description,
   footer,
 }: CardItemProps) {
-  const isUp = trend === "up";
-  const Icon = isUp ? TrendingUpIcon : TrendingDownIcon;
+//   const isUp = trend === "up";
+//   const Icon = isUp ? TrendingUpIcon : TrendingDownIcon;
 
   return (
     <Card className="@container/card">
@@ -41,17 +41,17 @@ export function CardItem({
         </CardTitle>
 
         <CardAction>
-          <Badge variant="outline">
+          {/* <Badge variant="outline">
             <Icon />
             {percentage}
-          </Badge>
+          </Badge> */}
         </CardAction>
       </CardHeader>
 
       <CardFooter className="flex-col items-start gap-1.5 text-sm">
         <div className="flex gap-2 font-medium">
           {description}
-          <Icon className="size-4" />
+          {/* <Icon className="size-4" /> */}
         </div>
         <div className="text-muted-foreground">{footer}</div>
       </CardFooter>
