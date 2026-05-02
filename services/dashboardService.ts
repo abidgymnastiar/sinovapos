@@ -37,12 +37,15 @@ export const getDashboardProductSales = async (
   days: number,
   productId?: string,
 ): Promise<DashboardProductSalesResponse> => {
-  const res = await api.get<DashboardProductSalesResponse>("/dashboard/product", {
-    params: {
-      days,
-      productId,
+  const res = await api.get<DashboardProductSalesResponse>(
+    "/dashboard/product",
+    {
+      params: {
+        days,
+        productId,
+      },
     },
-  });
+  );
 
   return res.data;
 };

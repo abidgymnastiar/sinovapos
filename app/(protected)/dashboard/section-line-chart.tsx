@@ -57,8 +57,7 @@ const daysMap: Record<TimeRange, number> = {
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState<TimeRange | null>(null);
-  const [selectedProductId, setSelectedProductId] =
-    React.useState<string>("");
+  const [selectedProductId, setSelectedProductId] = React.useState<string>("");
   const [products, setProducts] = React.useState<Product[]>([]);
   const [topProduct, setTopProduct] = React.useState<Product | null>(null);
   const [chartData, setChartData] = React.useState<SoldChartItem[]>([]);
@@ -66,10 +65,10 @@ export function ChartAreaInteractive() {
   const [error, setError] = React.useState<string | null>(null);
 
   const selectedTimeRange = timeRange ?? (isMobile ? "7d" : "90d");
-  const selectedProduct =
-    products.find((product) => product.id === selectedProductId) ??
-    topProduct ??
-    { id: "", name: "Product" };
+  const selectedProduct = products.find(
+    (product) => product.id === selectedProductId,
+  ) ??
+    topProduct ?? { id: "", name: "Product" };
 
   React.useEffect(() => {
     async function loadProducts() {
