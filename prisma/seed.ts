@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "../generated/prisma"
-import { seedProduct } from "./seeds/product.seed"
-import { seedStock } from "./seeds/stock.seed"
+import { PrismaClient } from "../generated/prisma";
+import { seedProduct } from "./seeds/product.seed";
+import { seedStock } from "./seeds/stock.seed";
 
 const adapter = new PrismaMariaDb({
   host: process.env.DATABASE_HOST,
@@ -12,17 +12,17 @@ const adapter = new PrismaMariaDb({
   connectionLimit: 5,
 });
 
-const prisma = new PrismaClient({ adapter })
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  await seedProduct(prisma) // ✅ OK
-  await seedStock(prisma)   // ✅ OK
+  await seedProduct(prisma);
+  await seedStock(prisma);
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seeder error:", e)
+    console.error("❌ Seeder error:", e);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });
