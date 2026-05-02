@@ -1,8 +1,8 @@
 import { ChartAreaInteractive } from "@/app/_layouts/chart-area-interactive";
 import { DataTable } from "@/app/_layouts/data-table";
-import { SectionCards } from "@/app/_layouts/section-cards";
 
 import data from "./data.json";
+import { SectionCards } from "./section-cards";
 
 export default function Page() {
   return (
