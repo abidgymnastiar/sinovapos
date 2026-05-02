@@ -6,6 +6,7 @@ import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { getProductById } from "@/services/productService";
 
+import { ProductDetailChart } from "./product-detail-chart";
 import { ProductStockTable } from "./table-core";
 
 type ProductDetailPageProps = {
@@ -79,6 +80,10 @@ export default async function ProductDetailPage({
             <p className="font-medium">{formatDate(product.updated_at)}</p>
           </div>
         </div>
+      </div>
+
+      <div className="px-4 lg:px-6">
+        <ProductDetailChart productId={product.id} productName={product.name} />
       </div>
 
       <div className="px-4 lg:px-6">
