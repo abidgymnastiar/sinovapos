@@ -83,7 +83,11 @@ export default async function ProductDetailPage({
       </div>
 
       <div className="px-4 lg:px-6">
-        <ProductDetailChart productId={product.id} productName={product.name} />
+        <ProductDetailChart
+          productId={product.id}
+          productName={product.name}
+          salesHistoryCount={result.meta.totalStocks}
+        />
       </div>
 
       <div className="px-4 lg:px-6">
