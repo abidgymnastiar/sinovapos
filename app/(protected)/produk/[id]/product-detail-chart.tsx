@@ -21,15 +21,16 @@ import { ChartFilter } from "@/app/_components/line-chart/chart-filter";
 import type { TimeRange } from "@/app/_components/line-chart/chart-types";
 import { getDashboardProductSales } from "@/services/dashboardService";
 import { getProductForecast } from "@/services/forecastService";
+import { ProductForecastInfo } from "./product-forecast-info";
 
 const chartConfig = {
   actual: {
-    label: "Actual Sold",
+    label: "Terjual",
     color: "var(--primary)",
   },
   forecast: {
-    label: "Forecast",
-    color: "var(--destructive)",
+    label: "Prediksi",
+    color: "var(--primary)",
   },
 } satisfies ChartConfig;
 
@@ -37,6 +38,7 @@ type SoldChartItem = {
   date: string;
   actual?: number;
   forecast?: number;
+  forecastBridge?: number;
 };
 
 type ProductDetailChartProps = {
@@ -69,6 +71,18 @@ function getForecastRequirementMessage(salesHistoryCount: number) {
   return `Prediksi belum tersedia karena belum ada data penjualan. Minimum ${minimumForecastDays} hari.`;
 }
 
+function getLastActualData(data: SoldChartItem[]) {
+  return data.reduce<SoldChartItem | null>((latest, item) => {
+    if (!latest) {
+      return item;
+    }
+
+    return new Date(item.date).getTime() > new Date(latest.date).getTime()
+      ? item
+      : latest;
+  }, null);
+}
+
 export function ProductDetailChart({
   productId,
   productName,
@@ -77,7 +91,9 @@ export function ProductDetailChart({
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState<TimeRange | null>(null);
   const [chartData, setChartData] = React.useState<SoldChartItem[]>([]);
-  const [forecastDetails, setForecastDetails] = React.useState<SoldChartItem[]>([]);
+  const [forecastDetails, setForecastDetails] = React.useState<SoldChartItem[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [forecastNotice, setForecastNotice] = React.useState<string | null>(
@@ -85,12 +101,12 @@ export function ProductDetailChart({
   );
 
   const selectedTimeRange = timeRange ?? (isMobile ? "7d" : "90d");
-  const forecastStartDate = forecastDetails[0]?.date;
-  const forecastEndDate = forecastDetails[forecastDetails.length - 1]?.date;
-  const forecastTotal = forecastDetails.reduce(
-    (sum, item) => sum + (item.forecast ?? 0),
-    0,
-  );
+  const forecastDescription =
+    salesHistoryCount >= minimumForecastDays
+      ? forecastDetails.length > 0
+        ? ` dan ${forecastDetails.length} data prediksi ke depan dari AI.`
+        : " dan prediksi ke depan dari AI."
+      : ". Prediksi tampil setelah minimum 22 hari data penjualan.";
 
   React.useEffect(() => {
     async function loadChartData() {
@@ -111,24 +127,55 @@ export function ProductDetailChart({
         );
 
         const actualDates = new Set(actualData.map((item) => item.date));
+        const lastActualData = getLastActualData(actualData);
+        const lastActualTime = lastActualData
+          ? new Date(lastActualData.date).getTime()
+          : null;
 
         let normalizedForecasts: SoldChartItem[] = [];
         let forecastDataForChart: SoldChartItem[] = [];
+        let forecastBridgeData: SoldChartItem[] = [];
 
         if (salesHistoryCount >= minimumForecastDays) {
           try {
             const forecastResponse = await getProductForecast(productId);
 
-            normalizedForecasts = (forecastResponse.forecasts ?? []).map(
-              (item) => ({
+            normalizedForecasts = (forecastResponse.forecasts ?? [])
+              .map((item) => ({
                 date: normalizeDate(item.date),
                 forecast: item.prediction,
-              }),
-            );
+              }))
+              .sort(
+                (a, b) =>
+                  new Date(a.date).getTime() - new Date(b.date).getTime(),
+              );
 
-            forecastDataForChart = normalizedForecasts.filter(
-              (item) => !actualDates.has(item.date),
-            );
+            forecastDataForChart = normalizedForecasts.filter((item) => {
+              const forecastTime = new Date(item.date).getTime();
+
+              return (
+                !actualDates.has(item.date) &&
+                (lastActualTime === null || forecastTime > lastActualTime)
+              );
+            });
+
+            const firstForecast = forecastDataForChart[0];
+
+            if (
+              lastActualData?.actual !== undefined &&
+              firstForecast?.forecast !== undefined
+            ) {
+              forecastBridgeData = [
+                {
+                  date: lastActualData.date,
+                  forecastBridge: lastActualData.actual,
+                },
+                {
+                  date: firstForecast.date,
+                  forecastBridge: firstForecast.forecast,
+                },
+              ];
+            }
           } catch (forecastError) {
             setForecastNotice(
               getErrorMessage(forecastError, "Prediksi belum tersedia."),
@@ -145,7 +192,17 @@ export function ProductDetailChart({
         });
 
         forecastDataForChart.forEach((item) => {
-          mergedDataMap.set(item.date, item);
+          mergedDataMap.set(item.date, {
+            ...mergedDataMap.get(item.date),
+            ...item,
+          });
+        });
+
+        forecastBridgeData.forEach((item) => {
+          mergedDataMap.set(item.date, {
+            ...mergedDataMap.get(item.date),
+            ...item,
+          });
         });
 
         const sortedData = Array.from(mergedDataMap.values()).sort(
@@ -173,9 +230,7 @@ export function ProductDetailChart({
             <CardDescription>
               Menampilkan data penjualan {daysMap[selectedTimeRange]} hari
               terakhir
-              {salesHistoryCount >= minimumForecastDays
-                ? " dan prediksi 7 hari ke depan dari AI."
-                : ". Prediksi tampil setelah minimum 22 hari data penjualan."}
+              {forecastDescription}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -189,7 +244,10 @@ export function ProductDetailChart({
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          <AreaChart data={chartData}>
+          <AreaChart
+            data={chartData}
+            margin={{ top: 12, right: 16, left: 8, bottom: 0 }}
+          >
             <defs>
               <linearGradient id="fillActual" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -203,14 +261,27 @@ export function ProductDetailChart({
                   stopOpacity={0.1}
                 />
               </linearGradient>
+              <linearGradient id="fillForecast" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-forecast)"
+                  stopOpacity={0.35}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-forecast)"
+                  stopOpacity={0.06}
+                />
+              </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} horizontal={false} />
+            <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               minTickGap={32}
+              padding={{ left: 8, right: 8 }}
               tickFormatter={(value) =>
                 new Date(value).toLocaleDateString("id-ID", {
                   month: "short",
@@ -234,90 +305,50 @@ export function ProductDetailChart({
             />
             <Area
               dataKey="actual"
-              type="natural"
+              type="monotone"
               fill="url(#fillActual)"
               stroke="var(--color-actual)"
+              strokeWidth={2}
               isAnimationActive
               connectNulls={false}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+            <Area
+              dataKey="forecastBridge"
+              type="monotone"
+              fill="none"
+              stroke="var(--color-forecast)"
+              strokeWidth={2.5}
+              strokeDasharray="5 5"
+              isAnimationActive
+              connectNulls
+              tooltipType="none"
+              legendType="none"
+              dot={false}
             />
             <Area
               dataKey="forecast"
-              type="natural"
-              fill="none"
+              type="monotone"
+              fill="url(#fillForecast)"
               stroke="var(--color-forecast)"
-              strokeWidth={2}
+              strokeWidth={2.5}
+              strokeDasharray="5 5"
               isAnimationActive
-              connectNulls={true}
+              connectNulls={false}
+              dot={{ r: 2.5, strokeWidth: 2 }}
+              activeDot={{ r: 4 }}
             />
           </AreaChart>
         </ChartContainer>
 
-        {forecastDetails.length > 0 && forecastStartDate && forecastEndDate ? (
-          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                  Prediksi berikutnya
-                </p>
-                <p className="font-semibold">
-                  {new Date(forecastStartDate).toLocaleDateString("id-ID", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                  {" - "}
-                  {new Date(forecastEndDate).toLocaleDateString("id-ID", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                  Total prediksi
-                </p>
-                <p className="font-semibold">{forecastTotal}</p>
-              </div>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {forecastDetails.map((item) => (
-                <div
-                  key={item.date}
-                  className="rounded-xl bg-white px-3 py-2 shadow-sm"
-                >
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                    {new Date(item.date).toLocaleDateString("id-ID", {
-                      day: "2-digit",
-                      month: "short",
-                    })}
-                  </p>
-                  <p className="mt-1 font-semibold text-slate-900">{item.forecast}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {!isLoading && !error && forecastNotice ? (
-          <div className="mt-4 rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            {forecastNotice}
-          </div>
-        ) : null}
-
-        {isLoading ? (
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            Loading chart data...
-          </div>
-        ) : error ? (
-          <div className="mt-4 text-center text-sm text-destructive">
-            {error}
-          </div>
-        ) : chartData.length === 0 ? (
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            No sales data available for this product.
-          </div>
-        ) : null}
+        <ProductForecastInfo
+          forecastDetails={forecastDetails}
+          forecastNotice={forecastNotice}
+          isLoading={isLoading}
+          error={error}
+          hasChartData={chartData.length > 0}
+        />
       </CardContent>
     </Card>
   );
