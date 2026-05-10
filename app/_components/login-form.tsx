@@ -1,3 +1,10 @@
+"use client"
+
+import { useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
+import { LoaderCircleIcon } from "lucide-react"
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +17,7 @@ import {
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
@@ -17,48 +25,89 @@ import { Input } from "@/components/ui/input"
 
 export function LoginForm({
   className,
+  callbackUrl,
+  initialError,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & {
+  callbackUrl: string
+  initialError?: string
+}) {
+  const router = useRouter()
+  const [error, setError] = useState(initialError)
+  const [isLoading, setIsLoading] = useState(false)
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError(undefined)
+    setIsLoading(true)
+
+    const formData = new FormData(event.currentTarget)
+    const email = String(formData.get("email") ?? "")
+    const password = String(formData.get("password") ?? "")
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      callbackUrl,
+      redirect: false,
+    })
+
+    setIsLoading(false)
+
+    if (!result || result.error) {
+      setError("Email atau password tidak sesuai.")
+      return
+    }
+
+    router.replace(callbackUrl)
+    router.refresh()
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Masuk ke Sinovapos</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Gunakan akun yang sudah terdaftar untuk melanjutkan.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="admin@sinovapos.local"
+                  autoComplete="email"
+                  disabled={isLoading}
                   required
                 />
               </Field>
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                  required
+                />
+                <FieldError>{error}</FieldError>
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
-                <Button variant="outline" type="button">
-                  Login with Google
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <LoaderCircleIcon className="animate-spin" />
+                  ) : null}
+                  Masuk
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Sign up</a>
+                  Hubungi administrator jika belum memiliki akun.
                 </FieldDescription>
               </Field>
             </FieldGroup>

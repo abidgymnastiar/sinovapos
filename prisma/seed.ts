@@ -3,6 +3,7 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma";
 import { seedProduct } from "./seeds/product.seed";
 import { seedStock } from "./seeds/stock.seed";
+import { seedUserLogin } from "./seeds/user.seed";
 
 const adapter = new PrismaMariaDb({
   host: process.env.DATABASE_HOST,
@@ -15,6 +16,7 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  await seedUserLogin(prisma);
   await seedProduct(prisma);
   await seedStock(prisma);
 }

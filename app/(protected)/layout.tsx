@@ -1,9 +1,22 @@
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
+
+import { getAuthSession } from "@/auth";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "../_layouts/app-sidebar";
 import { SiteHeader } from "../_layouts/site-header";
 
-export default function ProdukPage({ children }: { children: ReactNode }) {
+export default async function ProtectedLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const session = await getAuthSession();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
   return (
     <div>
       <SidebarProvider
@@ -14,7 +27,14 @@ export default function ProdukPage({ children }: { children: ReactNode }) {
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant="inset" />
+        <AppSidebar
+          variant="inset"
+          user={{
+            name: session.user.name ?? "Pengguna",
+            email: session.user.email ?? "",
+            avatar: session.user.image,
+          }}
+        />
         <SidebarInset>
           <SiteHeader />
           <div className="flex flex-1 flex-col">
