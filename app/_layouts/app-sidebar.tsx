@@ -119,20 +119,20 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "#",
+      title: "Setting",
+      url: "/setting",
       icon: <Settings2Icon />,
     },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: <CircleHelpIcon />,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: <SearchIcon />,
-    },
+    // {
+    //   title: "Get Help",
+    //   url: "#",
+    //   icon: <CircleHelpIcon />,
+    // },
+    // {
+    //   title: "Search",
+    //   url: "#",
+    //   icon: <SearchIcon />,
+    // },
   ],
   documents: [
     {
