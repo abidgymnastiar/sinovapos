@@ -18,7 +18,7 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   await seedUserLogin(prisma);
   await seedProduct(prisma);
-  await seedStock(prisma);
+  // await seedStock(prisma);
 }
 
 main()
