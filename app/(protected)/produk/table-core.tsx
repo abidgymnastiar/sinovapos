@@ -123,9 +123,9 @@ export function ProductTable({
             <ProductImage product={row.original} />
             <div className="min-w-0">
               <div className="truncate font-medium">{row.original.name}</div>
-              <div className="text-xs text-muted-foreground">
+              {/* <div className="text-xs text-muted-foreground">
                 ID: {row.original.id}
-              </div>
+              </div> */}
             </div>
           </div>
         ),

@@ -85,7 +85,7 @@ function ProductCell({ product }: { product: Product }) {
       </Avatar>
       <div className="min-w-0">
         <div className="truncate font-medium">{product.name}</div>
-        <div className="text-xs text-muted-foreground">ID: {product.id}</div>
+        {/* <div className="text-xs text-muted-foreground">ID: {product.id}</div> */}
       </div>
     </div>
   );
