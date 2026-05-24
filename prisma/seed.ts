@@ -2,7 +2,7 @@ import "dotenv/config";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma";
 import { seedProduct } from "./seeds/product.seed";
-import { seedStock } from "./seeds/stock.seed";
+import { seedTempuraSales } from "./seeds/tempura.seed";
 import { seedUserLogin } from "./seeds/user.seed";
 
 const adapter = new PrismaMariaDb({
@@ -16,8 +16,9 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  await seedUserLogin(prisma);
-  await seedProduct(prisma);
+  // await seedUserLogin(prisma);
+  // await seedProduct(prisma);
+  await seedTempuraSales(prisma);
   // await seedStock(prisma);
 }
 
