@@ -68,12 +68,12 @@ export default async function ProductDetailPage({
             <p className="font-medium">{product.name}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">ID Produk</p>
-            <p className="font-medium">{product.id}</p>
-          </div>
-          <div>
             <p className="text-sm text-muted-foreground">Total Data</p>
             <p className="font-medium">{result.meta.totalStocks}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Tanggal Dibuat</p>
+            <p className="font-medium">{formatDate(product.created_at)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Diperbarui</p>
