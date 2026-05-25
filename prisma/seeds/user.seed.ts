@@ -4,7 +4,7 @@ import { PrismaClient } from "../../generated/prisma";
 
 const seedUser = {
   name: process.env.SEED_USER_NAME ?? "Administrator",
-  email: (process.env.SEED_USER_EMAIL ?? "admin").toLowerCase(),
+  email: (process.env.SEED_USER_EMAIL ?? "admin@local").toLowerCase(),
   password: process.env.SEED_USER_PASSWORD ?? "1234567",
 };
 
