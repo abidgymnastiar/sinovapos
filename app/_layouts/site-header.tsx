@@ -15,6 +15,10 @@ const routeTitles = [
     url: "/dashboard",
   },
   {
+    title: "Prediksi",
+    url: "/prediksi",
+  },
+  {
     title: "Produk",
     url: "/produk",
   },

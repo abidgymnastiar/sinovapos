@@ -1,6 +1,15 @@
 "use client";
 
+import * as React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImportStockForm } from "@/components/ImportStockForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,9 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   EllipsisVerticalIcon,
-  CircleUserRoundIcon,
-  CreditCardIcon,
-  BellIcon,
+  FileSpreadsheetIcon,
   LogOutIcon,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -46,6 +53,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const [isImportDialogOpen, setIsImportDialogOpen] = React.useState(false);
   const initials = getInitials(user.name);
 
   return (
@@ -100,20 +108,10 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUserRoundIcon />
+              <DropdownMenuItem onSelect={() => setIsImportDialogOpen(true)}>
+                <FileSpreadsheetIcon />
                 Import Excel
               </DropdownMenuItem>
-              {/* <DropdownMenuItem>
-                <CreditCardIcon
-                />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon
-                />
-                Notifications
-              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -126,6 +124,18 @@ export function NavUser({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Import Stock</DialogTitle>
+              <DialogDescription>
+                Upload file Excel dengan kolom Tanggal, Nama Produk, dan Jumlah
+                Terjual.
+              </DialogDescription>
+            </DialogHeader>
+            <ImportStockForm />
+          </DialogContent>
+        </Dialog>
       </SidebarMenuItem>
     </SidebarMenu>
   );

@@ -22,8 +22,6 @@ import {
   CameraIcon,
   FileTextIcon,
   Settings2Icon,
-  CircleHelpIcon,
-  SearchIcon,
   DatabaseIcon,
   FileChartColumnIcon,
   FileIcon,
@@ -37,6 +35,11 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: <LayoutDashboardIcon />,
+    },
+    {
+      title: "Prediksi",
+      url: "/prediksi",
+      icon: <FileChartColumnIcon />,
     },
     {
       title: "Produk",

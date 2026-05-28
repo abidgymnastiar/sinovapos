@@ -83,7 +83,7 @@ function parseMonth(rawMonth: string) {
   return new Date(Date.UTC(year, monthIndex, 1));
 }
 
-function getRequestedMonthStart(req: Request) {
+async function getRequestedMonthStart(req: Request) {
   const { searchParams } = new URL(req.url);
   const rawMonth = searchParams.get("month");
 
@@ -100,7 +100,18 @@ function getRequestedMonthStart(req: Request) {
     return parsedDate ? getMonthStart(parsedDate) : null;
   }
 
-  return getMonthStart(getTodayStockDate());
+  const latestStock = await prisma.stock.findFirst({
+    orderBy: [
+      { created_at: "desc" },
+      { date: "desc" },
+      { id: "desc" },
+    ],
+    select: {
+      date: true,
+    },
+  });
+
+  return getMonthStart(latestStock?.date ?? getTodayStockDate());
 }
 
 function getAdditionalTanggalMerah(req: Request) {
@@ -165,7 +176,7 @@ function getMonthDateColumns(
 
 export async function GET(req: Request) {
   try {
-    const monthStart = getRequestedMonthStart(req);
+    const monthStart = await getRequestedMonthStart(req);
 
     if (!monthStart) {
       return NextResponse.json(

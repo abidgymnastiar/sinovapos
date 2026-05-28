@@ -1,7 +1,13 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/produk", "/penjualan", "/laporan"];
+const protectedRoutes = [
+  "/dashboard",
+  "/prediksi",
+  "/produk",
+  "/penjualan",
+  "/laporan",
+];
 
 function isProtectedRoute(pathname: string) {
   return protectedRoutes.some(
@@ -33,5 +39,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/produk/:path*", "/penjualan/:path*", "/laporan/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/prediksi/:path*",
+    "/produk/:path*",
+    "/penjualan/:path*",
+    "/laporan/:path*",
+  ],
 };
