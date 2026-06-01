@@ -16,8 +16,8 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  await seedUserLogin(prisma);
-  // await seedProduct(prisma);
+  // await seedUserLogin(prisma);
+  await seedProduct(prisma);
   // await seedTempuraSales(prisma);
   // await seedStock(prisma);
 }
