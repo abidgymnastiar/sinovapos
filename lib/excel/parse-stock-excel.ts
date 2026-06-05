@@ -141,7 +141,7 @@ function parseSold(value: ExcelCell) {
 
 export function parseStockExcel(buffer: ArrayBuffer): ParseStockExcelResult {
   const workbook = XLSX.read(buffer, {
-    cellDates: true,
+    cellDates: false,
     type: "array",
   });
   const sheetName = workbook.SheetNames[0];

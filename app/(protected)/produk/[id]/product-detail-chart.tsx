@@ -20,7 +20,7 @@ import {
 import { ChartFilter } from "@/app/_components/line-chart/chart-filter";
 import type { TimeRange } from "@/app/_components/line-chart/chart-types";
 import { getDashboardProductSales } from "@/services/dashboardService";
-import { getProductForecast } from "@/services/forecastService";
+import { getProductPrediction } from "@/services/predictionService";
 import { ProductForecastInfo } from "./product-forecast-info";
 
 const chartConfig = {
@@ -138,7 +138,7 @@ export function ProductDetailChart({
 
         if (salesHistoryCount >= minimumForecastDays) {
           try {
-            const forecastResponse = await getProductForecast(productId);
+            const forecastResponse = await getProductPrediction(productId);
 
             normalizedForecasts = (forecastResponse.forecasts ?? [])
               .map((item) => ({

@@ -7,6 +7,18 @@ export type PredictionDetailPoint = {
   predicted_sales: number;
 };
 
+export type ProductPredictionItem = {
+  date: string;
+  prediction: number;
+};
+
+export type ProductPredictionData = {
+  forecasts: ProductPredictionItem[];
+  name: string;
+  productId: number;
+  steps: number;
+};
+
 export type PredictionDetailProduct = {
   accuracy: number | null;
   alpha: number | null;
@@ -61,6 +73,12 @@ type PredictionErrorResponse = {
   message?: string;
 };
 
+type ProductPredictionResponse = {
+  data: ProductPredictionData;
+  message: string;
+  status: string;
+};
+
 export class PredictionApiError extends Error {
   status?: number;
 
@@ -83,6 +101,28 @@ function getPredictionErrorMessage(data: unknown) {
   }
 
   return null;
+}
+
+export async function getProductPrediction(
+  productId: string | number,
+): Promise<ProductPredictionData> {
+  try {
+    const response = await api.get<ProductPredictionResponse>(
+      `/predictions/${productId}`,
+    );
+
+    return response.data.data;
+  } catch (error) {
+    if (isAxiosError<PredictionErrorResponse>(error)) {
+      throw new PredictionApiError(
+        getPredictionErrorMessage(error.response?.data) ??
+          "Gagal memuat data prediksi",
+        error.response?.status,
+      );
+    }
+
+    throw error;
+  }
 }
 
 function normalizeGeneratedPredictionPayload(
